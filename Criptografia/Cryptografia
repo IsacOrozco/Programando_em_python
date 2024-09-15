@@ -1,0 +1,146 @@
+import random
+import os
+from sympy import mod_inverse
+
+
+def achaTamanho(x): #essa função serve para encontrar o tamanho de um numero inteiro
+    a = str(x) 
+    if len(a) > 1:
+        if a[0] == '0':
+            return len(a) - 1
+        else:
+            return len(a)
+    return len(a)
+
+
+def gera_primo(n):  # essa função gera um número primo para a escolha de p ,q e tambem de e
+    primos = []
+    for num in range(2, n + 1): # gera numero de inicio 2 e adiciona +1 para a variavel n
+        for i in range(2, num): 
+            if (num % i) == 0: 
+                break
+        else:
+            primos.append(num)
+
+    return primos
+
+
+def cript(msg, e, n): #essa função encripita a mensagem utilizando como parametro a mensagem a ser encriptada
+                      #a chave privada 'e' e o 'n' que é a multiplicação de 'p' e 'q'
+    txt = []
+    global ltr #essa lista serve para medir quantos digitos tem cada letra 
+    ltr = []
+    for i in msg:
+        indice = letras.find(i)#este indice verifica se a letra esta no alfabeto
+        txt_plan = ord(i) # essa variavel transforma a letra no valor decimal em binario de acordo com a tabela ASCII 
+        if indice > 25:#se a letra estiver no alfabeto o indice irá diminuir e assim rotacionar
+            indice -= 26
+
+        txt.append(str((txt_plan**e) % n))#faz a conta responsavel pela encriptação transforma em string e adiciona na lista que será o texto 
+        ltr.append(len(str((txt_plan**e) % n)))#adiciona o tamanho do valor na lista ltr
+
+    return ''.join(txt) #transforma tudo numa String só
+
+
+def decrypt(msg, d, n):#desincripta o texto utilizando como parametros a mensagem encriptada , a chave publica e o valor de n
+    txt = [] 
+    cont = 0
+    txt_decript = 0
+    decrypt_bin = []
+    cont2 = ltr[cont] #essa variavel serve para delimitar o tamanho do pedaço que será analizado , ou seja ela delimita o espaço do numero correspondente a letra
+    cont3 = 0 #essa variavel acompanha a outra sendo que serve para saber ate onde foi analizado e começar a proxima
+    while True:
+            
+        val_crypt = int(msg[cont3:cont2]) # é o pedaço que corresponde a letra que será analizada ou chamada de fatiamento da quantidade pega
+
+        txt_decript = (val_crypt**d) % n #faz a conta de decriptação, e volta o valor da letra para o decimal correspondente em binário da tabela ASCII
+        decrypt_bin.append(txt_decript)#adiciona todos os valores decimais na lista
+
+
+        if len(decrypt_bin) == len(ltr): #verifica se já viu todas as letras 
+            break
+   
+        cont+=1
+        
+        cont2 += ltr[cont]
+
+        cont3 += achaTamanho(val_crypt) #adiciona mais um tamanho
+        
+        
+    for i in decrypt_bin: #pega os valores decimais e transforma em caracteres normais 
+        val_decript = chr(i)
+        txt.append(val_decript)
+
+    return '' . join(txt) #retorna o texto escrito
+
+
+primos = gera_primo(10000) #gera uma lista de numeros primos dos 10.000 primeiros números primos
+
+# escolhe um número primo da lista dos 10.000 numeros primos para ser o p
+p = random.choice(primos)
+
+while True:
+    q = random.choice(primos)  # gera o número primo se ele for diferente de p
+    if q != p:
+        break
+
+
+
+letras = "abcdefghijklmnopqrstuvwxyz" #utiliza-se para rotacionar e criptografar caso ultrapasse o limite do indice
+n = p * q  # o n é gerado na multiplicação dos dois números
+
+# calcula o phi que vai ser utilizado como parametro do modulo inverso
+totiente = (p - 1)*(q-1)
+
+while True:
+    # o 'e' é gerado aleatóriamente sendo que deve ser maior do que 1 e menor do que o totiente
+    e = random.choice(primos)
+    if e > 1 and e < totiente:
+        break
+
+d= mod_inverse(e,totiente) # pega um numero no meio de e e totiente, fatiando e pegando algum valor entre esses dois
+
+print('---'*10)
+print('Bem vindo ao enigma')
+print('---'*10)
+
+msg = input("Digite uma mensagem:")
+
+txt = ''
+
+var_teste = ''
+
+while 'OK' not in var_teste :#Mostrar a chave do usuario
+    print('Sua chave publica é ',d)
+    
+    print('''crtl + shift + c e ctrl+shift+v para Linux ''')
+    var_teste = input('Digite OK para iniciar a criptografia: ').upper() 
+
+
+os.system('cls')
+while True: ##Menu
+    print('Criptografia')
+    print('[1]Criptografar')
+    print('[2]Descriptografar')
+    print('[3]Digitar outra mensagem')
+    print('[4]Sair')
+
+    menu = int(input("Escolha a sua opção: "))
+
+    if menu == 1: #Escolheu criptografar
+        txt = cript(msg, e, n)
+        print("A mensagem ciptografada é {}".format(txt))
+
+    if menu == 2: #Escolheu descriptografar
+        ch_publi = int(input('Digite sua chave publica:'))
+        txt1 = decrypt(txt, ch_publi, n)
+        print("A mensagem descriptografada é {}".format(txt1))
+
+    if menu == 3:#Digitar outra mensagem
+        msg = input("Digite uma mensagem:")
+        os.system('clear')
+
+    elif menu == 4: #Sair
+        break
+
+print("Obrigado por utilizar tenha um bom dia!!")
